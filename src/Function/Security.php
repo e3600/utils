@@ -50,7 +50,7 @@ function filter_post(array $exception = null, bool $isTrim = true)
 function request($key = null, $default = null, $except = null)
 {
   if (is_null($key)) {
-    return Request::gets($except);
+    return Request::all($except);
   }
   return Request::get($key, $default);
 }

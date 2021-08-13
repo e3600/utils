@@ -14,7 +14,7 @@ class Request
    * @param null         $default 如果值不存在，返回默认值(name为字符串时有效)
    * @return array|int|mixed|string
    */
-  public static function get($name, $default = null)
+  public static function get($name, $default = null, $except = null)
   {
     $args      = array_merge($_GET, $_POST);
     $is_filter = defined('IS_FILTER'); // 避免重复过虑
@@ -46,7 +46,13 @@ class Request
     }
   }
   
-  public static function gets($except = null)
+  /**
+   * 获取全部字段
+   *
+   * @param null|array|string $except 排除字段(排除不获取的字段)
+   * @return array|string
+   */
+  public static function all($except = null)
   {
     // 处理排除字段
     $args = self::except(array_merge($_GET, $_POST), $except);
