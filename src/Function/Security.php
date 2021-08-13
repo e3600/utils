@@ -6,10 +6,11 @@ use JyUtils\Request\Request;
  * 过虑全部GET|POST
  *
  * @param array $exception 例外，不过虑的参数
- * @param bool  $isTrim    是否删首尾家，调用trim
+ * @param bool  $isTrim    是否删首尾空，调用trim
  */
 function filter(array $exception = null, bool $isTrim = true)
 {
+  define('IS_FILTER', true);
   $_GET  = Request::filter($_GET, $exception, $isTrim);
   $_POST = Request::filter($_POST, $exception, $isTrim);
 }
@@ -18,22 +19,24 @@ function filter(array $exception = null, bool $isTrim = true)
  * 单独过虑全部GET
  *
  * @param array $exception 例外，不过虑的参数
+ * @param bool  $isTrim    是否删首尾空，调用trim
  * @return array 返回处理完后的数组
  */
-function filter_get(array $exception = null)
+function filter_get(array $exception = null, bool $isTrim = true)
 {
-  return Request::filter($_GET, $exception);
+  return Request::filter($_GET, $exception, $isTrim);
 }
 
 /**
  * 单独过虑全部POST
  *
  * @param array $exception 例外，不过虑的参数
+ * @param bool  $isTrim    是否删首尾空，调用trim
  * @return array 返回处理完后的数组
  */
-function filter_post(array $exception = null)
+function filter_post(array $exception = null, bool $isTrim = true)
 {
-  return Request::filter($_POST, $exception);
+  return Request::filter($_POST, $exception, $isTrim);
 }
 
 /**
