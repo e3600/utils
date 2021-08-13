@@ -1,28 +1,32 @@
 {
-    "name": "ijingyi/utils",
-    "description": "Discuz专用工具包",
-    "keywords" : [ "juhe", "utils"],
-    "license": "MIT",
-    "version": "1.0.1",
-    "authors": [
-        {
-            "name": "果子",
-            "email": "33157@163.com"
-        }
-    ],
-    "require": {
-        "php": ">=5.6"
-    },
-    "packagist": {
-        "type": "composer",
-        "url": "https://packagist.phpcomposer.com"
-    },
-    "autoload": {
-        "psr-4": {
-          "JyUtils\\": "src/"
-        },
-        "files": [
-          "src/Common/discuz_toolchain.php"
-        ]
+  "name": "ijingyi/utils",
+  "description": "Discuz专用工具包",
+  "keywords": [
+    "juhe",
+    "utils"
+  ],
+  "license": "MIT",
+  "version": "1.0.2",
+  "authors": [
+    {
+      "name": "果子",
+      "email": "33157@163.com"
     }
+  ],
+  "require": {
+    "php": ">=5.6"
+  },
+  "packagist": {
+    "type": "composer",
+    "url": "https://packagist.phpcomposer.com"
+  },
+  "autoload": {
+    "psr-4": {
+      "JyUtils\\": "src/"
+    },
+    "files": [
+      "src/Function/Security.php",
+      "src/Function/discuz_toolchain.php"
+    ]
+  }
 }

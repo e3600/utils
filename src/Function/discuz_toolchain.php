@@ -1,7 +1,5 @@
 <?php
 
-namespace JyUtils\Common;
-
 /**
  * @yazi 封装的 Discuz 工具链，
  * 之所以单独放一个文件是为了避免被乱改
