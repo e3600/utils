@@ -3,7 +3,7 @@
     "description": "Discuz专用工具包",
     "keywords" : [ "juhe", "utils"],
     "license": "MIT",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "authors": [
         {
             "name": "果子",
@@ -20,6 +20,9 @@
     "autoload": {
         "psr-4": {
           "JyUtils\\": "src/"
-        }
+        },
+        "files": [
+          "src/Common/discuz_toolchain.php"
+        ]
     }
 }
