@@ -75,31 +75,31 @@ class Str
   /**
    * 取由start和length参数指定的字符串部分。
    *
-   * @param string   $string
+   * @param string   $subject
    * @param int      $start
    * @param int|null $length
    * @return string
    */
-  public static function substr($string, $start, $length = null)
+  public static function substr($subject, $start, $length = null)
   {
-    return mb_substr($string, $start, $length, 'UTF-8');
+    return mb_substr($subject, $start, $length, 'UTF-8');
   }
   
   /**
    * 取子字符串出现的次数。
    *
-   * @param string   $haystack
-   * @param string   $needle
+   * @param string   $subject
+   * @param string   $search
    * @param int      $offset
    * @param int|null $length
    * @return int
    */
-  public static function substrCount($haystack, $needle, $offset = 0, $length = null)
+  public static function substrCount($subject, $search, $offset = 0, $length = null)
   {
     if (!is_null($length)) {
-      return substr_count($haystack, $needle, $offset, $length);
+      return substr_count($subject, $search, $offset, $length);
     } else {
-      return substr_count($haystack, $needle, $offset);
+      return substr_count($subject, $search, $offset);
     }
   }
   
@@ -127,7 +127,6 @@ class Str
   public static function finish($value, $cap)
   {
     $quoted = preg_quote($cap, '/');
-    
     return preg_replace('/(?:' . $quoted . ')+$/u', '', $value) . $cap;
   }
   
@@ -143,13 +142,11 @@ class Str
   public static function replaceArray($search, array $replace, $subject)
   {
     $segments = explode($search, $subject);
-    
-    $result = array_shift($segments);
+    $result   = array_shift($segments);
     
     foreach ($segments as $segment) {
       $result .= (array_shift($replace) ?? $search) . $segment;
     }
-    
     return $result;
   }
   
@@ -220,36 +217,34 @@ class Str
    * 判断给定的字符串是否包含给定的子字符串(第二个参数可以为数组，如果为数组，只要包含一个就返回true)。
    * https://learnku.com/docs/laravel/7.x/helpers/7486#74302b
    *
-   * @param string          $haystack
+   * @param string          $subject
    * @param string|string[] $needles
    * @return bool
    */
-  public static function contains($haystack, $needles)
+  public static function contains($subject, $needles)
   {
     foreach ((array)$needles as $needle) {
-      if ($needle !== '' && mb_strpos($haystack, $needle) !== false) {
+      if ($needle !== '' && mb_strpos($subject, $needle) !== false) {
         return true;
       }
     }
-    
     return false;
   }
   
   /**
    * 判断给定的字符串是否包含[所有]数组值。
    *
-   * @param string   $haystack
+   * @param string   $subject
    * @param string[] $needles
    * @return bool
    */
-  public static function containsAll($haystack, array $needles)
+  public static function containsAll($subject, array $needles)
   {
     foreach ($needles as $needle) {
-      if (!static::contains($haystack, $needle)) {
+      if (!static::contains($subject, $needle)) {
         return false;
       }
     }
-    
     return true;
   }
   
