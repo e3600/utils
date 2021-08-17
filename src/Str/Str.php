@@ -315,6 +315,17 @@ class Str
     return mb_strlen($value);
   }
   
+  public static function dstrpos($string, $arr, $returnvalue = false)
+  {
+    if (empty($string)) return false;
+    foreach ((array)$arr as $v) {
+      if (strpos($string, $v) !== false) {
+        return $returnvalue ? $v : true;
+      }
+    }
+    return false;
+  }
+  
   /**
    * 将给定的字符串转换为小写。
    *

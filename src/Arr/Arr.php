@@ -153,7 +153,7 @@ class Arr
   }
   
   /**
-   * Get an item from an array using "dot" notation.
+   * 使用“.”表示法从数组中获取项目
    *
    * @param \ArrayAccess|array $array
    * @param string|int|null    $key
@@ -299,7 +299,7 @@ class Arr
   }
   
   /**
-   * 如果给定的值不是数组而且不是 null，则将其包装为一个。
+   * 如果给定的值不是数组而且不是 null，则将其包装为一个 `array`。
    *
    * @param mixed $value
    * @return array
@@ -322,7 +322,7 @@ class Arr
    */
   public static function splitbyid($data, $field = 'id')
   {
-    return array_filter(splitbyname($data, $field), 'is_numeric');
+    return array_filter(self::splitbyname($data, $field), 'is_numeric');
   }
   
   /**
@@ -334,6 +334,10 @@ class Arr
    */
   public static function splitbyname($data, $field = 'name')
   {
+    $is_value = function ($var) {
+      return $var !== '' and $var !== null;
+    };
+    
     if (is_int($data)) {
       $data = [$data];
     } else if (is_string($data)) {
@@ -344,7 +348,7 @@ class Arr
       $data = [$data[$field]];
     }
     
-    return array_values(array_filter(array_unique($data), 'is_value'));
+    return array_values(array_filter(array_unique($data), $is_value));
   }
   
   /**
@@ -359,18 +363,17 @@ class Arr
   }
   
   /**
-   * 取得数组深度
+   * 取数组深度(维度)
    *
    * @param $array
    * @return int
    */
-  public static function array_depth($array)
+  public static function depth($array)
   {
     $max_depth = 1;
-    
     foreach ($array as $value) {
       if (is_array($value)) {
-        $depth = self::array_depth($value) + 1;
+        $depth = self::depth($value) + 1;
         
         if ($depth > $max_depth) {
           $max_depth = $depth;
@@ -380,23 +383,35 @@ class Arr
     return $max_depth;
   }
   
-  public static function groupby($data, Closure $fn)
+  /**
+   * 分组
+   *
+   * @param array    $array
+   * @param callable $fn
+   * @return array
+   */
+  public static function groupby($array, callable $fn)
   {
     $ret = [];
-    foreach ($data as $v) {
+    foreach ($array as $v) {
       @$ret[$fn($v)] = $v;
     }
-    
     return $ret;
   }
   
-  public static function groupbyid($data, $field = 'id')
+  /**
+   * 分组，根据字段
+   *
+   * @param array  $array
+   * @param string $field
+   * @return array
+   */
+  public static function groupbyid($array, $field = 'id')
   {
     $ret = [];
-    foreach ($data as $v) {
+    foreach ($array as $v) {
       @$ret[$v[$field]] = $v;
     }
-    
     return $ret;
   }
 }
