@@ -38,13 +38,18 @@ class Request
       return self::trim($res, "'");
       
     } else {
-      [$key, $type] = explode(":", $name);
+      if (strpos($name, ':')){
+        [$key, $type] = explode(":", $name);
+      }else{
+        $type = '';
+        $key = $name;
+      }
       if ($type == 'int') {
         return isset($args[$key]) ? intval($args[$key]) : $default;
       } else if ($is_filter) {
-        return $args[$key] ? self::trim($args[$key], "'") : $default;
+        return isset($args[$key]) ? self::trim($args[$key], "'") : $default;
       } else {
-        return $args[$key] ? self::quote($args[$key]) : $default;
+        return isset($args[$key]) ? self::quote($args[$key]) : $default;
       }
     }
   }
