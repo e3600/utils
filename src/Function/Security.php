@@ -1,6 +1,7 @@
 <?php
 
 use JyUtils\Request\Request;
+use JyUtils\Request\uploadFilter;
 
 /**
  * 过虑全部GET|POST
@@ -54,3 +55,15 @@ function request($key = null, $default = null, $except = null)
   }
   return Request::get($key, $default);
 }
+
+/**
+ * 上传文件安全过虑，当文件存在木马嫌疑时，将会回调
+ *
+ * @param $dangerCall
+ */
+function uploadFilter($dangerCall)
+{
+  uploadFilter::start($dangerCall);
+}
+
+

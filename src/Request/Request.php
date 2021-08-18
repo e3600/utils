@@ -130,7 +130,7 @@ class Request
           $v = self::filter($Array[$key], $except, $isTrim);
         } else {
           $v = $isTrim ? self::quote(trim($v)) : self::quote($v);
-          $v = str_replace('\n', "\n", $v);
+          $v = str_replace(['\r','\n'], ["\r","\n"], $v);
         }
       }
     } else {
@@ -138,7 +138,7 @@ class Request
         if (!in_array($key, $except)) {
           $v = $isTrim ? self::quote(trim($v)) : self::quote($v);
         }
-        $v = str_replace('\n', "\n", $v);
+        $v = str_replace(['\r','\n'], ["\r","\n"], $v);
       }
     }
     return self::trim($Array, "'");
