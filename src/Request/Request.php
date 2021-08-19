@@ -65,7 +65,7 @@ class Request
   {
     // Discuz环境
     if (method_exists('DB', 'quote')) {
-      return self::trim(self::quote($args[$key], $noarray), "'");
+      return self::trim(DB::quote($args[$key], $noarray), "'");
     }
     
     if (is_string($str)) {
