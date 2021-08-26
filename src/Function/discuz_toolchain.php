@@ -453,6 +453,11 @@ function is_value($var)
   return $var !== '' and $var !== null;
 }
 
+function is_number($var)
+{
+  return strlen(intval($var)) == strlen($var);
+}
+
 /**
  * 人类友好的文件尺寸
  *
@@ -652,7 +657,7 @@ function groupbyprefix(&$data)
   $result = [];
   foreach ($data as $k => $v) {
     if ($k[0] == '_') {
-      list(, $group, $name) = explode('_', $k, 3);
+      [, $group, $name] = explode('_', $k, 3);
       if (!$group || !$name) {
         continue;
       }
@@ -693,7 +698,7 @@ function sortby(&$array, $orderby)
 {
   $args = [];
   foreach (explode(',', orderby($orderby)) as $v) {
-    list($name, $sort) = explode(' ', $v);
+    [$name, $sort] = explode(' ', $v);
     
     $args[] = array_column($array, trim($name, '`'));
     $args[] = $sort == 'asc' ? SORT_ASC : SORT_DESC;
@@ -916,7 +921,7 @@ function safety_sql($sql)
   
   // 组合集
   $sql = preg_replace_callback('/([a-zA-Z]+\.)?{([a-zA-Z0-9,_]+)\|([0-9a-zA-Z_]+)}/', function ($matches) {
-    list($lead, $group, $prefix) = array_slice($matches, 1);
+    [$lead, $group, $prefix] = array_slice($matches, 1);
     $prefix = rtrim($prefix, '_') ? "{$prefix}_" : '';
     
     return implode(',', array_map(function ($a) use ($lead, $prefix) {
@@ -951,7 +956,7 @@ function orderby($sql)
   
   $ret = '';
   foreach ($fields as $v) {
-    list($name, $order) = explode(' ', trim($v), 2);
+    [$name, $order] = explode(' ', trim($v), 2);
     
     $order = in_array($order, ['asc', 'desc']) ? $order : 'asc';
     $ret   .= safety_field($name) . " {$order},";
@@ -1261,7 +1266,7 @@ function field_seed($tables)
 {
   $fields = [];
   foreach (splitbyname($tables) as $item) {
-    list($table, $alias) = preg_split('/\s+/', trim($item));
+    [$table, $alias] = preg_split('/\s+/', trim($item));
     
     foreach (fetch_all("show full columns from {$table}") as $field) {
       if (preg_match('/(int|float)/', $field['Type'])) {

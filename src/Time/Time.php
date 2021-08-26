@@ -429,14 +429,14 @@ class Time
     }
     
     if ($res && $returnStr) {
-      $res['start_str'] = date('Y-m-d H:i:s', $res['start']);
-      $res['end_str']   = date('Y-m-d H:i:s', $res['end']);
+      $res['start_str'] = date('Y-m-d', $res['start']);
+      $res['end_str']   = date('Y-m-d', $res['end']);
       
       $temp = $res['last'];
       unset($res['last']);
       $res['last']              = $temp;
-      $res['last']['start_str'] = date('Y-m-d H:i:s', $res['last']['start']);
-      $res['last']['end_str']   = date('Y-m-d H:i:s', $res['last']['end']);
+      $res['last']['start_str'] = date('Y-m-d', $res['last']['start']);
+      $res['last']['end_str']   = date('Y-m-d', $res['last']['end']);
     }
     return $res;
   }
