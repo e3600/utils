@@ -26,7 +26,7 @@ use CURLFile;
  * @method static \JyUtils\Http\_http asForm()
  * @method static \JyUtils\Http\_http asJson()
  * @method static \JyUtils\Http\_http post(string $url, $data = [])
- * @method static \JyUtils\Http\_http get($url)
+ * @method static \JyUtils\Http\_http get($url, $params = [])
  * @method static \JyUtils\Http\_http body()
  * @method static \JyUtils\Http\_http json()
  * @method static \JyUtils\Http\_http object()
@@ -309,7 +309,7 @@ class _http
    * @param string|array $params
    * @return $this
    */
-  public function get($url, $params)
+  public function get($url, $params = [])
   {
     $this->opt['type'] = "GET";
     if (is_array($params) && $params) {
