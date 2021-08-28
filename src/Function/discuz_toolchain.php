@@ -1297,24 +1297,41 @@ function utf82gbk($str = '')
   return iconv("utf-8", "gbk", $str);
 }
 
-function redis_set($name, $value, $ttl = 0, $prefix = '')
+// Discuz专用redis - - - - - Start
+function redis_get($name, $fn, $prefix = '')
 {
-  return C::memory()->set($name, $value, $ttl, $prefix);
-}
-
-function redis_get($name, $fn)
-{
-  $value = C::memory()->get($name);
+  $value = C::memory()->get($name, $prefix);
   if ($value) {
     return $value;
   }
   return $fn();
 }
 
-function redis_rm($name)
+function redis_set($name, $value, $ttl = 0, $prefix = '')
 {
-  return C::memory()->rm($name);
+  return C::memory()->set($name, $value, $ttl, $prefix);
 }
+
+function redis_rm($name, $prefix = '')
+{
+  return C::memory()->rm($name, $prefix);
+}
+
+function redis_clear()
+{
+  return C::memory()->clear();
+}
+
+function redis_inc($key, $step = 1)
+{
+  return C::memory()->inc($key, $step);
+}
+
+function redis_dec($key, $step = 1)
+{
+  return C::memory()->dec($key, $step);
+}
+// Discuz专用redis - - - - - End
 
 function u2g($value)
 {
