@@ -1357,7 +1357,7 @@ function db_limit($count = 10, $page = 0)
 
 function now()
 {
-  return new \Jingyi\my\lumen\Time();
+  return new \JyUtils\Time\Time();
 }
 
 if (!class_exists('NullValue')) {
