@@ -100,7 +100,7 @@ if (!function_exists('json')) {
   function json($data)
   {
     global $_G;
-    if ($_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
+    if (isset($_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__']) && $_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
       $_GET['__DO_NOT_RUSH_BACK_JSON__'][] = $data;
       throw new DoNotRushBackJSONException;
     }
@@ -110,7 +110,7 @@ if (!function_exists('json')) {
     }
     
     unset($data['__RETURN_BY_LAYDATA__']);
-    if ($_GET['__EXECUTE_DURATION__']) {
+    if (isset($_GET['__EXECUTE_DURATION__'])) {
       $data['duration'] = round(microtime(true) - $_GET['__EXECUTE_DURATION__'], 3);
       unset($_GET['__EXECUTE_DURATION__']);
     }
@@ -361,7 +361,7 @@ function windup($data = null)
 {
   global $_G;
   
-  while (count($_GET[$_GET[$_GET['__LAST_DEFERS__']) > 0) {
+  while (count($_GET['__LAST_DEFERS__']) > 0) {
     call(array_pop($_GET['__LAST_DEFERS__']), $data);
   }
   return $data;
@@ -526,7 +526,7 @@ function laydata($sql, $cb = null, $cacheTime = 0)
   }
   
   global $_G;
-  if ($_GET[$_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
+  if ($_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
     $_GET['__DO_NOT_RUSH_BACK_JSON__'][] = $var + ['__RETURN_BY_LAYDATA__' => true];
     throw new DoNotRushBackJSONException;
   }
@@ -892,7 +892,7 @@ function last_sql($n = 0)
 {
   global $_G;
   if (!$n && $n !== 0) {
-    return $_GET[$_GET[$_GET['__LAST_QUERY_SQL__'];
+    return $_GET['__LAST_QUERY_SQL__'];
   }
   
   return $_GET['__LAST_QUERY_SQL__'][$n];
@@ -975,7 +975,7 @@ function query($sql, $arg = [], $silent = false, $unbuffered = false)
   return call(function ($s) use ($arg, $silent, $unbuffered) {
     global $_G;
     
-    array_unshift($_GET[$_GET['__LAST_QUERY_SQL__'], $s);
+    array_unshift($_GET['__LAST_QUERY_SQL__'], $s);
     return DB::query($s, $arg, $silent, $unbuffered);
   }, safety_sql($sql));
 }
