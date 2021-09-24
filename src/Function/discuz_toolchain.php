@@ -4,9 +4,9 @@
  * @yazi 封装的 Discuz 工具链，
  * 之所以单独放一个文件是为了避免被乱改
  */
-$_G['__LAST_DEFERS__']      = [];
-$_G['__LAST_QUERY_SQL__']   = [];
-$_G['__EXECUTE_DURATION__'] = microtime(true);
+$_GET['__LAST_DEFERS__']      = [];
+$_GET['__LAST_QUERY_SQL__']   = [];
+$_GET['__EXECUTE_DURATION__'] = microtime(true);
 
 /**
  * Dump and Die (打印并死掉)
@@ -39,6 +39,11 @@ function dda($value, $exit = false)
   if ($exit) {
     exit();
   }
+}
+
+function start_microtime()
+{
+  $_GET['__EXECUTE_DURATION__'] = microtime(true);
 }
 
 function input($data)
@@ -95,8 +100,8 @@ if (!function_exists('json')) {
   function json($data)
   {
     global $_G;
-    if ($_G['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
-      $_G['__DO_NOT_RUSH_BACK_JSON__'][] = $data;
+    if ($_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
+      $_GET['__DO_NOT_RUSH_BACK_JSON__'][] = $data;
       throw new DoNotRushBackJSONException;
     }
     
@@ -105,9 +110,9 @@ if (!function_exists('json')) {
     }
     
     unset($data['__RETURN_BY_LAYDATA__']);
-    if ($_G['__EXECUTE_DURATION__']) {
-      $data['duration'] = round(microtime(true) - $_G['__EXECUTE_DURATION__'], 3);
-      unset($_G['__EXECUTE_DURATION__']);
+    if ($_GET['__EXECUTE_DURATION__']) {
+      $data['duration'] = round(microtime(true) - $_GET['__EXECUTE_DURATION__'], 3);
+      unset($_GET['__EXECUTE_DURATION__']);
     }
     exit(json_encode(windup($data)));
   }
@@ -185,7 +190,7 @@ function swap($fn, $vars = [])
     $result = $fn();
   } catch (DoNotRushBackJSONException $e) {
     global $_G;
-    $result = array_shift($_G['__DO_NOT_RUSH_BACK_JSON__']);
+    $result = array_shift($_GET['__DO_NOT_RUSH_BACK_JSON__']);
   }
   
   foreach (array_keys($vars) as $k) {
@@ -260,19 +265,19 @@ function wait($fn, $vars = [])
 {
   global $_G;
   
-  if (!$_G['__DO_NOT_RUSH_BACK_JSON__']) {
-    $_G['__DO_NOT_RUSH_BACK_JSON__'] = [];
+  if (!$_GET['__DO_NOT_RUSH_BACK_JSON__']) {
+    $_GET['__DO_NOT_RUSH_BACK_JSON__'] = [];
   }
   
-  if ($_G['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
-    $_G['__DO_NOT_RUSH_BACK_JSON_COUNTER__']++;
+  if ($_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
+    $_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__']++;
   } else {
-    $_G['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] = 1;
+    $_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] = 1;
   }
   
   $result = swap($fn, $vars);
-  if (--$_G['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] < 1) {
-    unset($_G['__DO_NOT_RUSH_BACK_JSON_COUNTER__']);
+  if (--$_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] < 1) {
+    unset($_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__']);
   }
   
   return $result;
@@ -320,7 +325,7 @@ function waitf($fn, $vars = [])
 function defer($fn)
 {
   global $_G;
-  $_G['__LAST_DEFERS__'][] = $fn;
+  $_GET['__LAST_DEFERS__'][] = $fn;
 }
 
 /**
@@ -356,8 +361,8 @@ function windup($data = null)
 {
   global $_G;
   
-  while (count($_G['__LAST_DEFERS__']) > 0) {
-    call(array_pop($_G['__LAST_DEFERS__']), $data);
+  while (count($_GET[$_GET[$_GET['__LAST_DEFERS__']) > 0) {
+    call(array_pop($_GET['__LAST_DEFERS__']), $data);
   }
   return $data;
 }
@@ -521,8 +526,8 @@ function laydata($sql, $cb = null, $cacheTime = 0)
   }
   
   global $_G;
-  if ($_G['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
-    $_G['__DO_NOT_RUSH_BACK_JSON__'][] = $var + ['__RETURN_BY_LAYDATA__' => true];
+  if ($_GET[$_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
+    $_GET['__DO_NOT_RUSH_BACK_JSON__'][] = $var + ['__RETURN_BY_LAYDATA__' => true];
     throw new DoNotRushBackJSONException;
   }
   
@@ -753,19 +758,19 @@ function rearrange($array, $orderby)
 function transaction($fn)
 {
   global $_G;
-  if ($_G['__IN_TRANSACTION__'] > 0) {
-    $_G['__IN_TRANSACTION__']++;
+  if ($_GET['__IN_TRANSACTION__'] > 0) {
+    $_GET['__IN_TRANSACTION__']++;
   } else {
-    $_G['__IN_TRANSACTION__'] = 1;
+    $_GET['__IN_TRANSACTION__'] = 1;
     query('set autocommit=0');
     query('begin');
   }
   
   $res = $fn();
-  if (--$_G['__IN_TRANSACTION__'] < 1) {
+  if (--$_GET['__IN_TRANSACTION__'] < 1) {
     query('commit');
     query('set autocommit=1');
-    unset($_G['__IN_TRANSACTION__']);
+    unset($_GET['__IN_TRANSACTION__']);
   }
   
   return $res;
@@ -887,10 +892,10 @@ function last_sql($n = 0)
 {
   global $_G;
   if (!$n && $n !== 0) {
-    return $_G['__LAST_QUERY_SQL__'];
+    return $_GET[$_GET[$_GET['__LAST_QUERY_SQL__'];
   }
   
-  return $_G['__LAST_QUERY_SQL__'][$n];
+  return $_GET['__LAST_QUERY_SQL__'][$n];
 }
 
 /**
@@ -970,7 +975,7 @@ function query($sql, $arg = [], $silent = false, $unbuffered = false)
   return call(function ($s) use ($arg, $silent, $unbuffered) {
     global $_G;
     
-    array_unshift($_G['__LAST_QUERY_SQL__'], $s);
+    array_unshift($_GET[$_GET['__LAST_QUERY_SQL__'], $s);
     return DB::query($s, $arg, $silent, $unbuffered);
   }, safety_sql($sql));
 }
@@ -980,7 +985,7 @@ function fetch_all($sql, $arg = [], $keyfield = '', $silent = false)
   return call(function ($s) use ($arg, $keyfield, $silent) {
     global $_G;
     
-    array_unshift($_G['__LAST_QUERY_SQL__'], $s);
+    array_unshift($_GET['__LAST_QUERY_SQL__'], $s);
     return DB::fetch_all($s, $arg, $keyfield, $silent);
   }, safety_sql($sql));
 }
@@ -990,7 +995,7 @@ function fetch_first($sql, $arg = [], $silent = false)
   return call(function ($s) use ($arg, $silent) {
     global $_G;
     
-    array_unshift($_G['__LAST_QUERY_SQL__'], $s);
+    array_unshift($_GET['__LAST_QUERY_SQL__'], $s);
     return DB::fetch_first($s, $arg, $silent);
   }, safety_sql($sql));
 }
@@ -999,7 +1004,7 @@ function result_first($sql, $arg = [], $silent = false)
 {
   return call(function ($s) use ($arg, $silent) {
     global $_G;
-    array_unshift($_G['__LAST_QUERY_SQL__'], $s);
+    array_unshift($_GET['__LAST_QUERY_SQL__'], $s);
     return DB::result_first($s, $arg, $silent);
   }, safety_sql($sql));
 }
@@ -1331,6 +1336,7 @@ function redis_dec($key, $step = 1)
 {
   return C::memory()->dec($key, $step);
 }
+
 // Discuz专用redis - - - - - End
 
 function u2g($value)
