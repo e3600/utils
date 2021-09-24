@@ -111,7 +111,7 @@ if (!function_exists('json')) {
     
     unset($data['__RETURN_BY_LAYDATA__']);
     if (isset($_GET['__EXECUTE_DURATION__'])) {
-      $data['duration'] = round(microtime(true) - $_GET['__EXECUTE_DURATION__'], 3);
+      $data['execute_duration'] = round(microtime(true) - $_GET['__EXECUTE_DURATION__'], 3);
       unset($_GET['__EXECUTE_DURATION__']);
     }
     exit(json_encode(windup($data)));
