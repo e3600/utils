@@ -475,6 +475,32 @@ class Time
   }
   
   /**
+   * 取指定时间，24小时中每个小时的范围
+   *
+   * @param int $typeTime 0=今天，1=昨天，或指定时间戳
+   * @return array
+   */
+  public static function get12Hour($typeTime = 0)
+  {
+    $list = [];
+    if ($typeTime == 1) {
+      $day = date('Y-m-d', strtotime('-1 day', time()));
+    } else if (strlen(trim($typeTime)) == 10) {
+      $day = date('Y-m-d', $typeTime);
+    } else {
+      $day = date('Y-m-d', time());
+    }
+    for ($i = 0; $i < 24; $i++) {
+      $list[] = [
+        'hour'  => $i,
+        'start' => strtotime($day . ' ' . $i . ':00:00'),
+        'end'   => strtotime($day . ' ' . $i . ':59:59'),
+      ];
+    }
+    return $list;
+  }
+  
+  /**
    * 取指定时间戳，当前隶属的季度时间范围
    *
    * @param int $dateline 指定时间戳，留空默认为当前时间
