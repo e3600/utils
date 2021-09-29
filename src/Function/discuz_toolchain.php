@@ -1319,7 +1319,7 @@ if (!function_exists('clone_image')) {
   }
 }
 
-if (!function_exists('clone_image')) {
+if (!function_exists('hasParam')) {
   /**
    * 请求中是否含有某有效参数
    *
