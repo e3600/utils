@@ -254,15 +254,15 @@ if (function_exists('uselock')) {
   }
 }
 
-if (function_exists('uselock')) {
+if (function_exists('lock')) {
   /**
    * 全局事务锁
    *
    * @param string $key 钥匙，30 字符内
    */
-  function lock($key)
+  function lock($key, $tableName = 'pre_wukong_locks')
   {
-    DB::query("insert into pre_locks (`key`, created_at) values ('" . daddslashes($key) . "', " . TIMESTAMP . ")");
+    DB::query("insert into {$tableName} (`key`, created_at) values ('" . daddslashes($key) . "', " . TIMESTAMP . ")");
   }
 }
 
@@ -272,9 +272,9 @@ if (function_exists('unlock')) {
    *
    * @param string $key 钥匙，30 字符内
    */
-  function unlock($key)
+  function unlock($key, $tableName = 'pre_wukong_locks')
   {
-    DB::query("delete from pre_locks where `key`='" . daddslashes($key) . "'");
+    DB::query("delete from {$tableName} where `key`='" . daddslashes($key) . "'");
   }
 }
 
