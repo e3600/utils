@@ -7,7 +7,7 @@ $_GET['__LAST_DEFERS__']      = [];
 $_GET['__LAST_QUERY_SQL__']   = [];
 $_GET['__EXECUTE_DURATION__'] = microtime(true);
 
-if (function_exists('dd')) {
+if (!function_exists('dd')) {
   /**
    * Dump and Die (打印并死掉)
    */
@@ -26,7 +26,7 @@ HTML;
   }
 }
 
-if (function_exists('dda')) {
+if (!function_exists('dda')) {
   function dda($value, $exit = false)
   {
     global $_G;
@@ -44,14 +44,14 @@ if (function_exists('dda')) {
   }
 }
 
-if (function_exists('start_microtime')) {
+if (!function_exists('start_microtime')) {
   function start_microtime()
   {
     $_GET['__EXECUTE_DURATION__'] = microtime(true);
   }
 }
 
-if (function_exists('input')) {
+if (!function_exists('input')) {
   function input($data)
   {
     if (is_array($data)) {
@@ -65,7 +65,7 @@ if (function_exists('input')) {
   }
 }
 
-if (function_exists('input')) {
+if (!function_exists('input')) {
   function inc($name, $increase)
   {
     static $_vars = [];
@@ -77,14 +77,14 @@ if (function_exists('input')) {
   }
 }
 
-if (function_exists('null')) {
+if (!function_exists('null')) {
   function null()
   {
     return new NullValue;
   }
 }
 
-if (function_exists('once')) {
+if (!function_exists('once')) {
   /**
    * 一次（适用于请求生命周期）
    *
@@ -112,7 +112,6 @@ if (function_exists('once')) {
 if (!function_exists('json')) {
   function json($data)
   {
-    global $_G;
     if (isset($_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__']) && $_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
       $_GET['__DO_NOT_RUSH_BACK_JSON__'][] = $data;
       throw new DoNotRushBackJSONException;
@@ -161,7 +160,7 @@ if (!function_exists('fail')) {
     json(['status' => $status, 'msg' => $msg]);
   }
 }
-if (function_exists('call')) {
+if (!function_exists('call')) {
   /**
    * 调用某个函数
    *
@@ -181,7 +180,7 @@ if (function_exists('call')) {
   }
 }
 
-if (function_exists('swap')) {
+if (!function_exists('swap')) {
   /**
    * 代换请求参数
    *
@@ -204,7 +203,6 @@ if (function_exists('swap')) {
     try {
       $result = $fn();
     } catch (DoNotRushBackJSONException $e) {
-      global $_G;
       $result = array_shift($_GET['__DO_NOT_RUSH_BACK_JSON__']);
     }
     
@@ -216,7 +214,7 @@ if (function_exists('swap')) {
 }
 
 
-if (function_exists('flat')) {
+if (!function_exists('flat')) {
   /**
    * 平面化数组
    *
@@ -240,7 +238,7 @@ if (function_exists('flat')) {
   }
 }
 
-if (function_exists('uselock')) {
+if (!function_exists('uselock')) {
   /**
    * 使用全局锁
    * 注意，需要使用succ或fail才可以解锁
@@ -254,7 +252,7 @@ if (function_exists('uselock')) {
   }
 }
 
-if (function_exists('lock')) {
+if (!function_exists('lock')) {
   /**
    * 全局事务锁
    *
@@ -266,7 +264,7 @@ if (function_exists('lock')) {
   }
 }
 
-if (function_exists('unlock')) {
+if (!function_exists('unlock')) {
   /**
    * 解除全局事务锁
    *
@@ -278,7 +276,7 @@ if (function_exists('unlock')) {
   }
 }
 
-if (function_exists('wait')) {
+if (!function_exists('wait')) {
   /**
    * 等待
    *
@@ -288,8 +286,6 @@ if (function_exists('wait')) {
    */
   function wait($fn, $vars = [])
   {
-    global $_G;
-    
     if (!$_GET['__DO_NOT_RUSH_BACK_JSON__']) {
       $_GET['__DO_NOT_RUSH_BACK_JSON__'] = [];
     }
@@ -309,7 +305,7 @@ if (function_exists('wait')) {
   }
 }
 
-if (function_exists('waitd')) {
+if (!function_exists('waitd')) {
   /**
    * 等待数据
    *
@@ -324,7 +320,7 @@ if (function_exists('waitd')) {
   }
 }
 
-if (function_exists('waitf')) {
+if (!function_exists('waitf')) {
   /**
    * 只等待成功数据
    *
@@ -344,7 +340,7 @@ if (function_exists('waitf')) {
   }
 }
 
-if (function_exists('defer')) {
+if (!function_exists('defer')) {
   /**
    * 延迟函数
    *
@@ -352,12 +348,11 @@ if (function_exists('defer')) {
    */
   function defer($fn)
   {
-    global $_G;
     $_GET['__LAST_DEFERS__'][] = $fn;
   }
 }
 
-if (function_exists('defers')) {
+if (!function_exists('defers')) {
   /**
    * 调用succ时，会执行 $fn 函数
    *
@@ -373,7 +368,7 @@ if (function_exists('defers')) {
   }
 }
 
-if (function_exists('deferf')) {
+if (!function_exists('deferf')) {
   /**
    * 调用fail时，会执行 $fn 函数
    *
@@ -390,11 +385,9 @@ if (function_exists('deferf')) {
   }
 }
 
-if (function_exists('windup')) {
+if (!function_exists('windup')) {
   function windup($data = null)
   {
-    global $_G;
-    
     while (count($_GET['__LAST_DEFERS__']) > 0) {
       call(array_pop($_GET['__LAST_DEFERS__']), $data);
     }
@@ -402,7 +395,7 @@ if (function_exists('windup')) {
   }
 }
 
-if (function_exists('value')) {
+if (!function_exists('value')) {
   /**
    * 取值
    *
@@ -415,7 +408,7 @@ if (function_exists('value')) {
   }
 }
 
-if (function_exists('first')) {
+if (!function_exists('first')) {
   /**
    * 数组第一个
    *
@@ -429,7 +422,7 @@ if (function_exists('first')) {
   }
 }
 
-if (function_exists('last')) {
+if (!function_exists('last')) {
   /**
    * 数组最后一个
    *
@@ -442,7 +435,7 @@ if (function_exists('last')) {
   }
 }
 
-if (function_exists('match')) {
+if (!function_exists('match')) {
   /**
    * 正则匹配
    *
@@ -457,7 +450,7 @@ if (function_exists('match')) {
   }
 }
 
-if (function_exists('combine')) {
+if (!function_exists('combine')) {
   /**
    * 多元组合
    *
@@ -470,7 +463,7 @@ if (function_exists('combine')) {
   }
 }
 
-if (function_exists('contains')) {
+if (!function_exists('contains')) {
   /**
    * 集合中是否包含项目
    *
@@ -484,14 +477,14 @@ if (function_exists('contains')) {
   }
 }
 
-if (function_exists('is_nil')) {
+if (!function_exists('is_nil')) {
   function is_nil($var)
   {
     return $var instanceof NullValue;
   }
 }
 
-if (function_exists('is_assoc')) {
+if (!function_exists('is_assoc')) {
   /**
    * 是否为关联数组
    *
@@ -504,21 +497,21 @@ if (function_exists('is_assoc')) {
   }
 }
 
-if (function_exists('is_value')) {
+if (!function_exists('is_value')) {
   function is_value($var)
   {
     return $var !== '' and $var !== null;
   }
 }
 
-if (function_exists('is_number')) {
+if (!function_exists('is_number')) {
   function is_number($var)
   {
     return strlen(intval($var)) == strlen($var);
   }
 }
 
-if (function_exists('file_size')) {
+if (!function_exists('file_size')) {
   /**
    * 人类友好的文件尺寸
    *
@@ -549,7 +542,7 @@ if (function_exists('file_size')) {
   }
 }
 
-if (function_exists('laydata')) {
+if (!function_exists('laydata')) {
   /**
    * 自主分页函数
    *
@@ -583,7 +576,6 @@ if (function_exists('laydata')) {
       $cb($var['data'], $var['count']);
     }
     
-    global $_G;
     if ($_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
       $_GET['__DO_NOT_RUSH_BACK_JSON__'][] = $var + ['__RETURN_BY_LAYDATA__' => true];
       throw new DoNotRushBackJSONException;
@@ -596,7 +588,7 @@ if (function_exists('laydata')) {
   }
 }
 
-if (function_exists('paginate')) {
+if (!function_exists('paginate')) {
   /**
    * 分页函数
    *
@@ -612,7 +604,7 @@ if (function_exists('paginate')) {
   }
 }
 
-if (function_exists('joinbyid')) {
+if (!function_exists('joinbyid')) {
   /**
    * 联结数据中的 ID
    *
@@ -626,7 +618,7 @@ if (function_exists('joinbyid')) {
   }
 }
 
-if (function_exists('joinbyname')) {
+if (!function_exists('joinbyname')) {
   /**
    * 联结数据中的 NAME
    *
@@ -640,7 +632,7 @@ if (function_exists('joinbyname')) {
   }
 }
 
-if (function_exists('splitbyid')) {
+if (!function_exists('splitbyid')) {
   /**
    * 分裂数据中的 ID
    *
@@ -654,7 +646,7 @@ if (function_exists('splitbyid')) {
   }
 }
 
-if (function_exists('splitbyname')) {
+if (!function_exists('splitbyname')) {
   /**
    * 分裂数据中的 NAME
    *
@@ -678,7 +670,7 @@ if (function_exists('splitbyname')) {
   }
 }
 
-if (function_exists('groupby')) {
+if (!function_exists('groupby')) {
   function groupby($data, Closure $fn)
   {
     $ret = [];
@@ -690,7 +682,7 @@ if (function_exists('groupby')) {
   }
 }
 
-if (function_exists('groupbyid')) {
+if (!function_exists('groupbyid')) {
   function groupbyid($data, $field = 'id')
   {
     $ret = [];
@@ -702,7 +694,7 @@ if (function_exists('groupbyid')) {
   }
 }
 
-if (function_exists('groupsby')) {
+if (!function_exists('groupsby')) {
   function groupsby($data, Closure $fn)
   {
     $ret = [];
@@ -714,7 +706,7 @@ if (function_exists('groupsby')) {
   }
 }
 
-if (function_exists('groupsbyid')) {
+if (!function_exists('groupsbyid')) {
   function groupsbyid($data, $field = 'id')
   {
     $ret = [];
@@ -726,7 +718,7 @@ if (function_exists('groupsbyid')) {
   }
 }
 
-if (function_exists('groupbyprefix')) {
+if (!function_exists('groupbyprefix')) {
   function groupbyprefix(&$data)
   {
     if (!is_assoc($data)) {
@@ -753,7 +745,7 @@ if (function_exists('groupbyprefix')) {
   }
 }
 
-if (function_exists('idornull')) {
+if (!function_exists('idornull')) {
   function idornull($field, $id = null)
   {
     if (func_num_args() == 1) {
@@ -768,7 +760,7 @@ if (function_exists('idornull')) {
   }
 }
 
-if (function_exists('findone')) {
+if (!function_exists('findone')) {
   function findone($array, $value, $column = 'id')
   {
     $result = filterby($array, $value, $column);
@@ -776,14 +768,14 @@ if (function_exists('findone')) {
   }
 }
 
-if (function_exists('countby')) {
+if (!function_exists('countby')) {
   function countby($array, $value, $column = 'id')
   {
     return count(filterby($array, $value, $column));
   }
 }
 
-if (function_exists('sortby')) {
+if (!function_exists('sortby')) {
   function sortby(&$array, $orderby)
   {
     $args = [];
@@ -799,7 +791,7 @@ if (function_exists('sortby')) {
   }
 }
 
-if (function_exists('linkby')) {
+if (!function_exists('linkby')) {
   function linkby(&$source, $target, $source_column, $target_column)
   {
     foreach ($source as &$v) {
@@ -810,7 +802,7 @@ if (function_exists('linkby')) {
   }
 }
 
-if (function_exists('filterby')) {
+if (!function_exists('filterby')) {
   function filterby($array, $value, $column = 'id')
   {
     return array_values(array_filter($array, function ($v) use ($column, $value) {
@@ -819,7 +811,7 @@ if (function_exists('filterby')) {
   }
 }
 
-if (function_exists('rearrange')) {
+if (!function_exists('rearrange')) {
   function rearrange($array, $orderby)
   {
     foreach ($orderby as $field => $value) {
@@ -841,7 +833,7 @@ if (function_exists('rearrange')) {
   }
 }
 
-if (function_exists('transaction')) {
+if (!function_exists('transaction')) {
   /**
    * 开启一个事务
    *
@@ -850,7 +842,6 @@ if (function_exists('transaction')) {
    */
   function transaction($fn)
   {
-    global $_G;
     if ($_GET['__IN_TRANSACTION__'] > 0) {
       $_GET['__IN_TRANSACTION__']++;
     } else {
@@ -870,7 +861,7 @@ if (function_exists('transaction')) {
   }
 }
 
-if (function_exists('transaction_back')) {
+if (!function_exists('transaction_back')) {
   /**
    * 开始事务，如果失败时调用了fail，事务将被回滚
    *
@@ -887,7 +878,7 @@ if (function_exists('transaction_back')) {
   }
 }
 
-if (function_exists('ltransaction')) {
+if (!function_exists('ltransaction')) {
   /**
    * 以锁的方式开启一个事务
    *
@@ -907,7 +898,7 @@ if (function_exists('ltransaction')) {
   }
 }
 
-if (function_exists('onlyfields')) {
+if (!function_exists('onlyfields')) {
   /**
    * 从数组中筛选特定字段
    *
@@ -950,7 +941,7 @@ if (function_exists('onlyfields')) {
   }
 }
 
-if (function_exists('exceptfields')) {
+if (!function_exists('exceptfields')) {
   /**
    * 从数组中筛出特定字段
    *
@@ -990,21 +981,18 @@ if (function_exists('exceptfields')) {
   }
 }
 
-if (function_exists('last_sql')) {
+if (!function_exists('last_sql')) {
   function last_sql($n = 0)
   {
-    global $_G;
     if (!$n && $n !== 0) {
       return $_GET['__LAST_QUERY_SQL__'];
     }
-    
     return $_GET['__LAST_QUERY_SQL__'][$n];
   }
   
 }
 
-
-if (function_exists('create_sql')) {
+if (!function_exists('create_sql')) {
   /**
    * 创建 SQL 拼接
    *
@@ -1020,7 +1008,7 @@ if (function_exists('create_sql')) {
   
 }
 
-if (function_exists('safety_sql')) {
+if (!function_exists('safety_sql')) {
   /**
    * 更安全的 SQL
    *
@@ -1056,14 +1044,14 @@ if (function_exists('safety_sql')) {
   
 }
 
-if (function_exists('safety_field')) {
+if (!function_exists('safety_field')) {
   function safety_field($name)
   {
     return '`' . implode('`.`', explode('.', str_replace('`', '', $name))) . '`';
   }
 }
 
-if (function_exists('orderby')) {
+if (!function_exists('orderby')) {
   /**
    * 构建健全的 order by 字段
    *
@@ -1086,54 +1074,47 @@ if (function_exists('orderby')) {
   }
 }
 
-if (function_exists('query')) {
+if (!function_exists('query')) {
   function query($sql, $arg = [], $silent = false, $unbuffered = false)
   {
     return call(function ($s) use ($arg, $silent, $unbuffered) {
-      global $_G;
-      
       array_unshift($_GET['__LAST_QUERY_SQL__'], $s);
       return DB::query($s, $arg, $silent, $unbuffered);
     }, safety_sql($sql));
   }
 }
 
-if (function_exists('fetch_all')) {
+if (!function_exists('fetch_all')) {
   function fetch_all($sql, $arg = [], $keyfield = '', $silent = false)
   {
     return call(function ($s) use ($arg, $keyfield, $silent) {
-      global $_G;
-      
       array_unshift($_GET['__LAST_QUERY_SQL__'], $s);
       return DB::fetch_all($s, $arg, $keyfield, $silent);
     }, safety_sql($sql));
   }
 }
 
-if (function_exists('fetch_first')) {
+if (!function_exists('fetch_first')) {
   function fetch_first($sql, $arg = [], $silent = false)
   {
     return call(function ($s) use ($arg, $silent) {
-      global $_G;
-      
       array_unshift($_GET['__LAST_QUERY_SQL__'], $s);
       return DB::fetch_first($s, $arg, $silent);
     }, safety_sql($sql));
   }
 }
 
-if (function_exists('result_first')) {
+if (!function_exists('result_first')) {
   function result_first($sql, $arg = [], $silent = false)
   {
     return call(function ($s) use ($arg, $silent) {
-      global $_G;
       array_unshift($_GET['__LAST_QUERY_SQL__'], $s);
       return DB::result_first($s, $arg, $silent);
     }, safety_sql($sql));
   }
 }
 
-if (function_exists('array_depth')) {
+if (!function_exists('array_depth')) {
   /**
    * 取得数组深度
    *
@@ -1157,7 +1138,7 @@ if (function_exists('array_depth')) {
   }
 }
 
-if (function_exists('generate_order_id')) {
+if (!function_exists('generate_order_id')) {
   /**
    * 生成订单号
    *
@@ -1172,31 +1153,7 @@ if (function_exists('generate_order_id')) {
   }
 }
 
-if (function_exists('can_count')) {
-  function can_count($name)
-  {
-    $counter = fetch_first("select * from pre_wukong_counters where name='{$name}'");
-    
-    // 没有则立即执行
-    if (!$counter) {
-      return 1;
-    }
-    
-    // 超过有效期，立即执行
-    if ($counter['expired_at'] < time()) {
-      return 1;
-    }
-    
-    // 未过期，未超限
-    if ($counter['expired_at'] > time() && $counter['count'] < $counter['max_count']) {
-      return $counter['count'] + 1;
-    }
-    
-    return false;
-  }
-}
-
-if (function_exists('counter')) {
+if (!function_exists('counter')) {
   /**
    * 通用计数器
    *
@@ -1218,7 +1175,7 @@ if (function_exists('counter')) {
   }
 }
 
-if (function_exists('removeImages')) {
+if (!function_exists('removeImages')) {
   /**
    * 根据相关业务 ID 删除图片
    *
@@ -1230,7 +1187,7 @@ if (function_exists('removeImages')) {
   }
 }
 
-if (function_exists('removeSounds')) {
+if (!function_exists('removeSounds')) {
   /**
    * 根据相关业务 ID 删除声音
    *
@@ -1242,7 +1199,7 @@ if (function_exists('removeSounds')) {
   }
 }
 
-if (function_exists('removeVideos')) {
+if (!function_exists('removeVideos')) {
   /**
    * 根据相关业务 ID 删除视频
    *
@@ -1254,7 +1211,7 @@ if (function_exists('removeVideos')) {
   }
 }
 
-if (function_exists('diffAssets')) {
+if (!function_exists('diffAssets')) {
   /**
    * 对比模型间的新旧资源差异
    *
@@ -1334,7 +1291,7 @@ if (function_exists('diffAssets')) {
   }
 }
 
-if (function_exists('image_file')) {
+if (!function_exists('image_file')) {
   function image_file($name = 'foo.jpg')
   {
     global $_G;
@@ -1349,7 +1306,7 @@ if (function_exists('image_file')) {
   }
 }
 
-if (function_exists('clone_image')) {
+if (!function_exists('clone_image')) {
   function clone_image($source)
   {
     $file   = image_file($source);
@@ -1362,7 +1319,7 @@ if (function_exists('clone_image')) {
   }
 }
 
-if (function_exists('clone_image')) {
+if (!function_exists('clone_image')) {
   /**
    * 请求中是否含有某有效参数
    *
@@ -1380,7 +1337,7 @@ if (function_exists('clone_image')) {
   }
 }
 
-if (function_exists('arrayToXML')) {
+if (!function_exists('arrayToXML')) {
   function arrayToXML($arr)
   {
     $code = '';
@@ -1391,7 +1348,7 @@ if (function_exists('arrayToXML')) {
   }
 }
 
-if (function_exists('XMLToArray')) {
+if (!function_exists('XMLToArray')) {
   function XMLToArray($xml)
   {
     libxml_disable_entity_loader(true);
@@ -1400,7 +1357,7 @@ if (function_exists('XMLToArray')) {
   }
 }
 
-if (function_exists('noncestr')) {
+if (!function_exists('noncestr')) {
   function noncestr($length = 32)
   {
     $strings  = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -1413,7 +1370,7 @@ if (function_exists('noncestr')) {
   }
 }
 
-if (function_exists('field_seed')) {
+if (!function_exists('field_seed')) {
   function field_seed($tables)
   {
     $fields = [];
@@ -1432,7 +1389,7 @@ if (function_exists('field_seed')) {
   }
 }
 
-if (function_exists('user_signature')) {
+if (!function_exists('user_signature')) {
   function user_signature()
   {
     global $_USER;
@@ -1440,7 +1397,7 @@ if (function_exists('user_signature')) {
   }
 }
 
-if (function_exists('utf82gbk')) {
+if (!function_exists('utf82gbk')) {
   /**
    * UTF-8转GBK
    *
@@ -1454,8 +1411,8 @@ if (function_exists('utf82gbk')) {
   }
 }
 
-if (function_exists('redis_get')) {
-  // Discuz专用redis - - - - - Start
+// Discuz专用redis - - - - - Start
+if (!function_exists('redis_get')) {
   function redis_get($name, $fn, $prefix = '')
   {
     $value = C::memory()->get($name, $prefix);
@@ -1466,58 +1423,57 @@ if (function_exists('redis_get')) {
   }
 }
 
-if (function_exists('redis_set')) {
+if (!function_exists('redis_set')) {
   function redis_set($name, $value, $ttl = 0, $prefix = '')
   {
     return C::memory()->set($name, $value, $ttl, $prefix);
   }
 }
 
-if (function_exists('redis_rm')) {
+if (!function_exists('redis_rm')) {
   function redis_rm($name, $prefix = '')
   {
     return C::memory()->rm($name, $prefix);
   }
 }
 
-if (function_exists('redis_clear')) {
+if (!function_exists('redis_clear')) {
   function redis_clear()
   {
     return C::memory()->clear();
   }
 }
 
-if (function_exists('redis_inc')) {
+if (!function_exists('redis_inc')) {
   function redis_inc($key, $step = 1)
   {
     return C::memory()->inc($key, $step);
   }
 }
 
-if (function_exists('redis_dec')) {
+if (!function_exists('redis_dec')) {
   function redis_dec($key, $step = 1)
   {
     return C::memory()->dec($key, $step);
   }
 }
-
 // Discuz专用redis - - - - - End
 
-if (function_exists('u2g')) {
+if (!function_exists('u2g')) {
   function u2g($value)
   {
     return iconv('utf-8', 'gbk', $value);
   }
 }
 
-if (function_exists('g2u')) {
+if (!function_exists('g2u')) {
   function g2u($value)
   {
     return iconv('gbk', 'utf-8', $value);
   }
 }
 
-if (function_exists('db_limit')) {
+if (!function_exists('db_limit')) {
   function db_limit($count = 10, $page = 0)
   {
     $count = max(1, $count);
@@ -1531,7 +1487,7 @@ if (function_exists('db_limit')) {
   }
 }
 
-if (function_exists('now')) {
+if (!function_exists('now')) {
   function now()
   {
     return new \JyUtils\Time\Time();
