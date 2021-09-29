@@ -1,11 +1,16 @@
 <?php
+// 哪都达的不使用此文件
+if (stripos($_SERVER['HTTP_HOST'], 'jieyang.la') !== false) {
+  return;
+}
+
 /**
  * @yazi 封装的 Discuz 工具链，
  * 之所以单独放一个文件是为了避免被乱改
  */
-$_GET['__LAST_DEFERS__']      = [];
-$_GET['__LAST_QUERY_SQL__']   = [];
-$_GET['__EXECUTE_DURATION__'] = microtime(true);
+$_GG['__LAST_DEFERS__']      = [];
+$_GG['__LAST_QUERY_SQL__']   = [];
+$_GG['__EXECUTE_DURATION__'] = microtime(true);
 
 if (!function_exists('dd')) {
   /**
@@ -47,7 +52,8 @@ if (!function_exists('dda')) {
 if (!function_exists('start_microtime')) {
   function start_microtime()
   {
-    $_GET['__EXECUTE_DURATION__'] = microtime(true);
+    global $_GG;
+    $_GG['__EXECUTE_DURATION__'] = microtime(true);
   }
 }
 
@@ -97,10 +103,13 @@ if (!function_exists('once')) {
     static $history = [];
     
     $hash = crc32(serialize($var));
-    if (!array_key_exists($hash, $history)) {
+    if (is_nil($val)) {
+      unset($history[$hash]);
+    } else if (!array_key_exists($hash, $history)) {
       $history[$hash] = value($val);
     }
-    return $history[$hash];
+    
+    return @$history[$hash];
   }
 }
 
@@ -112,8 +121,9 @@ if (!function_exists('once')) {
 if (!function_exists('json')) {
   function json($data)
   {
-    if (isset($_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__']) && $_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
-      $_GET['__DO_NOT_RUSH_BACK_JSON__'][] = $data;
+    global $_GG;
+    if ($_GG['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
+      $_GG['__DO_NOT_RUSH_BACK_JSON__'][] = $data;
       throw new DoNotRushBackJSONException;
     }
     
@@ -121,12 +131,14 @@ if (!function_exists('json')) {
       header('Content-Type: application/json; charset=UTF-8');
     }
     
-    unset($data['__RETURN_BY_LAYDATA__']);
-    if (isset($_GET['__EXECUTE_DURATION__'])) {
-      $data['execute_duration'] = round(microtime(true) - $_GET['__EXECUTE_DURATION__'], 3);
-      unset($_GET['__EXECUTE_DURATION__']);
+    if (is_array($data)) {
+      unset($data['__RETURN_BY_LAYDATA__']);
     }
-    exit(json_encode(windup($data)));
+    
+    if (isset($_GG['__EXECUTE_DURATION__'])) {
+      $data['execute_duration'] = round(microtime(true) - $_GG['__EXECUTE_DURATION__'], 3);
+    }
+    exit(json_encode(windup($data), JSON_UNESCAPED_UNICODE));
   }
 }
 
@@ -204,12 +216,17 @@ if (!function_exists('swap')) {
     try {
       $result = $fn();
     } catch (DoNotRushBackJSONException $e) {
-      $result = array_shift($_GET['__DO_NOT_RUSH_BACK_JSON__']);
+      foreach (array_keys($vars) as $k) {
+        $_GET[$k] = $oldValues[$k];
+      }
+      
+      throw $e;
     }
     
     foreach (array_keys($vars) as $k) {
       $_GET[$k] = $oldValues[$k];
     }
+    
     return $result;
   }
 }
@@ -287,19 +304,25 @@ if (!function_exists('wait')) {
    */
   function wait($fn, $vars = [])
   {
-    if (!$_GET['__DO_NOT_RUSH_BACK_JSON__']) {
-      $_GET['__DO_NOT_RUSH_BACK_JSON__'] = [];
+    global $_GG;
+    if (!$_GG['__DO_NOT_RUSH_BACK_JSON__']) {
+      $_GG['__DO_NOT_RUSH_BACK_JSON__'] = [];
     }
     
-    if ($_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
-      $_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__']++;
+    if ($_GG['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
+      $_GG['__DO_NOT_RUSH_BACK_JSON_COUNTER__']++;
     } else {
-      $_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] = 1;
+      $_GG['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] = 1;
     }
     
-    $result = swap($fn, $vars);
-    if (--$_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] < 1) {
-      unset($_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__']);
+    try {
+      $result = swap($fn, $vars);
+    } catch (DoNotRushBackJSONException $e) {
+      $result = array_shift($_GG['__DO_NOT_RUSH_BACK_JSON__']);
+    }
+    
+    if (--$_GG['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] < 1) {
+      unset($_GG['__DO_NOT_RUSH_BACK_JSON_COUNTER__']);
     }
     
     return $result;
@@ -349,7 +372,8 @@ if (!function_exists('defer')) {
    */
   function defer($fn)
   {
-    $_GET['__LAST_DEFERS__'][] = $fn;
+    global $_GG;
+    $_GG['__LAST_DEFERS__'][] = $fn;
   }
 }
 
@@ -389,8 +413,15 @@ if (!function_exists('deferf')) {
 if (!function_exists('windup')) {
   function windup($data = null)
   {
-    while (count($_GET['__LAST_DEFERS__']) > 0) {
-      call(array_pop($_GET['__LAST_DEFERS__']), $data);
+    global $_GG;
+    if ($_GG['__IN_TRANSACTION__'] > 0) {
+      query('rollback');
+      query('set autocommit=1');
+      unset($_GG['__IN_TRANSACTION__']);
+    }
+    
+    while (count($_GG['__LAST_DEFERS__']) > 0) {
+      call(array_pop($_GG['__LAST_DEFERS__']), $data);
     }
     return $data;
   }
@@ -450,6 +481,12 @@ if (!function_exists('match')) {
     return $matches[1];
   }
 }
+if (!function_exists('streg')) {
+  function streg($string)
+  {
+    return '#' . preg_quote($string) . '#';
+  }
+}
 
 if (!function_exists('combine')) {
   /**
@@ -478,6 +515,80 @@ if (!function_exists('contains')) {
   }
 }
 
+if (!function_exists('intersect')) {
+  /**
+   * 集合中是否包含且只包含项目
+   *
+   * @param array|string $collection
+   * @param array|string $items
+   * @return bool
+   */
+  function intersect($collection, $items)
+  {
+    return $collection === array_intersect(splitbyname($collection), splitbyname($items));
+  }
+}
+
+if (!function_exists('plural')) {
+  /**
+   * 转换单词复数
+   *
+   * @param string $word
+   * @return string
+   */
+  function plural($word)
+  {
+    static $_rules = [
+      'plural' => [
+        '/(matr|vert|ind)(ix|ex)$/i' => '\1ices',    # matrix, vertex, index
+        '/(ss|sh|ch|x|z)$/i'         => '\1es',      # sibilant rule (no ending e)
+        '/([^aeiou])o$/i'            => '\1oes',     # -oes rule
+        '/([^aeiou]|qu)y$/i'         => '\1ies',     # -ies rule
+        '/sis$/i'                    => 'ses',       # synopsis, diagnosis
+        '/(m|l)ouse$/i'              => '\1ice',     # mouse, louse
+        '/(t|i)um$/i'                => '\1a',       # datum, medium
+        '/([li])fe?$/i'              => '\1ves',     # knife, life, shelf
+        '/(octop|vir|syllab)us$/i'   => '\1i',       # octopus, virus, syllabus
+        '/(ax|test)is$/i'            => '\1es',      # axis, testis
+        '/([a-rt-z])$/i'             => '\1s'        # not ending in s
+      ],
+      
+      'irregular' => [
+        'bus'         => 'busses',
+        'child'       => 'children',
+        'man'         => 'men',
+        'person'      => 'people',
+        'quiz'        => 'quizzes',
+        # words whose singular and plural forms are the same
+        'equipment'   => 'equipment',
+        'fish'        => 'fish',
+        'information' => 'information',
+        'money'       => 'money',
+        'moose'       => 'moose',
+        'news'        => 'news',
+        'rice'        => 'rice',
+        'series'      => 'series',
+        'sheep'       => 'sheep',
+        'species'     => 'species',
+      ],
+    ];
+    
+    if (isset($_rules['irregular'][$word])) {
+      return $_rules['irregular'][$word];
+    }
+    
+    foreach ($_rules['plural'] as $regex => $replace) {
+      $word = preg_replace($regex, $replace, $word, 1, $count);
+      
+      if ($count) {
+        return $word;
+      }
+    }
+    
+    return $word;
+  }
+}
+
 if (!function_exists('is_nil')) {
   function is_nil($var)
   {
@@ -494,7 +605,7 @@ if (!function_exists('is_assoc')) {
    */
   function is_assoc($var)
   {
-    return is_array($var) and (array_values($var) !== $var);
+    return is_array($var) and $var !== array_values($var) and ($keys = array_keys($var)) !== array_filter($keys, 'is_int');
   }
 }
 
@@ -563,22 +674,25 @@ if (!function_exists('laydata')) {
     if (is_array($sql) && isset($sql['__RETURN_BY_LAYDATA__'])) {
       $var = $sql;
     } else if (is_array($sql)) {
-      $var['data'] = $sql;
       $var['per']  = $var['count'] = count($var['data']);
-    } else {
+      $var['data'] = paginate(function ($_, $limit) use ($sql, &$var) {
+        return first([$sql, $var['per'] = $limit ?: $var['count']]);
+      });
+    } elseif (is_string($sql)) {
       $var['data']  = paginate(function ($start, $limit) use ($sql, &$var) {
         $var['per'] = $limit;
         return fetch_all("$sql limit $start, $limit");
       });
-      $var['count'] = fetch_first(preg_replace('#^select\s+(.+?)\s+from\s#i', 'select $1, count(*) from ', $sql))['count(*)'];
+      $var['count'] = fetch_first(preg_replace('#^select\s+([\s\S]+?)\s+from\s+([a-zA-Z0-9_]+\.)?pre_#i', 'select $1,count(*) from $2pre_', $sql))['count(*)'];
     }
     
     if ($cb) {
-      $cb($var['data'], $var['count']);
+      $cb($var['data'], $var['count'], $var['per']);
     }
     
-    if ($_GET['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
-      $_GET['__DO_NOT_RUSH_BACK_JSON__'][] = $var + ['__RETURN_BY_LAYDATA__' => true];
+    global $_GG;
+    if ($_GG['__DO_NOT_RUSH_BACK_JSON_COUNTER__'] > 0) {
+      $_GG['__DO_NOT_RUSH_BACK_JSON__'][] = $var + ['__RETURN_BY_LAYDATA__' => true];
       throw new DoNotRushBackJSONException;
     }
     
@@ -599,7 +713,7 @@ if (!function_exists('paginate')) {
   function paginate(Closure $cb)
   {
     $page  = $_GET['page'] > 0 ? intval($_GET['page']) : 1;
-    $limit = $_GET['limit'] > 0 ? intval($_GET['limit']) : 20;
+    $limit = hasParam('limit') && $_GET['limit'] >= 0 ? intval($_GET['limit']) : 20;
     
     return $cb(($page - 1) * $limit, $limit, $page);
   }
@@ -643,7 +757,7 @@ if (!function_exists('splitbyid')) {
    */
   function splitbyid($data, $field = 'id')
   {
-    return array_filter(splitbyname($data, $field), 'is_numeric');
+    return array_values(array_filter(splitbyname($data, $field), 'is_numeric'));
   }
 }
 
@@ -769,6 +883,18 @@ if (!function_exists('findone')) {
   }
 }
 
+if (!function_exists('sumby')) {
+  function sumby($array, $column, $scale = 2)
+  {
+    $total = 0;
+    foreach ($array as $item) {
+      $total = bcadd($total, $item[$column], $scale);
+    }
+    
+    return $total;
+  }
+}
+
 if (!function_exists('countby')) {
   function countby($array, $value, $column = 'id')
   {
@@ -812,6 +938,26 @@ if (!function_exists('filterby')) {
   }
 }
 
+if (!function_exists('fuzzysearch')) {
+  /**
+   * 迷糊查询
+   * fuzzysearch($zones, streg('镇'), 'name')
+   *
+   * @param array      $array
+   * @param string     $regex
+   * @param null|mixed $column
+   * @return array
+   */
+  function fuzzysearch($array, $regex, $column = null)
+  {
+    if (is_null($column)) {
+      return preg_grep($regex, $array) ?: [];
+    }
+    
+    return array_intersect_key($array, preg_grep($regex, array_column($array, $column))) ?: [];
+  }
+}
+
 if (!function_exists('rearrange')) {
   function rearrange($array, $orderby)
   {
@@ -843,19 +989,24 @@ if (!function_exists('transaction')) {
    */
   function transaction($fn)
   {
-    if ($_GET['__IN_TRANSACTION__'] > 0) {
-      $_GET['__IN_TRANSACTION__']++;
+    global $_GG;
+    if ($_GET['_transaction'] == 'NONE') {
+      return;
+    }
+    
+    if ($_GG['__IN_TRANSACTION__'] > 0) {
+      $_GG['__IN_TRANSACTION__']++;
     } else {
-      $_GET['__IN_TRANSACTION__'] = 1;
+      $_GG['__IN_TRANSACTION__'] = 1;
       query('set autocommit=0');
       query('begin');
     }
     
     $res = $fn();
-    if (--$_GET['__IN_TRANSACTION__'] < 1) {
+    if (--$_GG['__IN_TRANSACTION__'] < 1) {
       query('commit');
       query('set autocommit=1');
-      unset($_GET['__IN_TRANSACTION__']);
+      unset($_GG['__IN_TRANSACTION__']);
     }
     
     return $res;
@@ -934,7 +1085,15 @@ if (!function_exists('onlyfields')) {
     }
     
     foreach (array_keys($data) as $k) {
-      if (!in_array($k, $fields)) {
+      $flag = false;
+      foreach ($fields as $f) {
+        if (fnmatch($f, $k)) {
+          $flag = true;
+          break;
+        }
+      }
+      
+      if (!$flag) {
         unset($data[$k]);
       }
     }
@@ -974,8 +1133,11 @@ if (!function_exists('exceptfields')) {
     }
     
     foreach (array_keys($data) as $k) {
-      if (in_array($k, $fields)) {
-        unset($data[$k]);
+      foreach ($fields as $f) {
+        if (fnmatch($f, $k)) {
+          unset($data[$k]);
+          break;
+        }
       }
     }
     return $data;
@@ -985,12 +1147,12 @@ if (!function_exists('exceptfields')) {
 if (!function_exists('last_sql')) {
   function last_sql($n = 0)
   {
+    global $_GG;
     if (!$n && $n !== 0) {
-      return $_GET['__LAST_QUERY_SQL__'];
+      return $_GG['__LAST_QUERY_SQL__'];
     }
-    return $_GET['__LAST_QUERY_SQL__'][$n];
+    return $_GG['__LAST_QUERY_SQL__'][$n];
   }
-  
 }
 
 if (!function_exists('create_sql')) {
@@ -1020,8 +1182,9 @@ if (!function_exists('safety_sql')) {
   {
     $sql = trim($sql);
     $sql = str_replace('{TIMESTAMP}', time(), $sql);
-    $sql = preg_replace('/\s+in\s*\(\)/', ' in (0)', $sql);
-    $sql = preg_replace('/([a-zA-Z_\.]+)=($|\s)/', ' 0 ', $sql);
+    $sql = preg_replace('/\s+in\s*\(\)/i', " in ('')", $sql);
+    $sql = preg_replace('/([a-zA-Z_\.]+)=($|\s)/', " '' ", $sql);
+    $sql = preg_replace('/select\s+\*,\s*count\(\*\)\s+from\s+([a-zA-Z0-9_]+\.)?pre_/i', 'select count(*) from $1pre_', $sql);
     
     // 组合集
     $sql = preg_replace_callback('/([a-zA-Z]+\.)?{([a-zA-Z0-9,_]+)\|([0-9a-zA-Z_]+)}/', function ($matches) {
@@ -1066,6 +1229,8 @@ if (!function_exists('orderby')) {
     $ret = '';
     foreach ($fields as $v) {
       [$name, $order] = explode(' ', trim($v), 2);
+      if (!$name)
+        continue;
       
       $order = in_array($order, ['asc', 'desc']) ? $order : 'asc';
       $ret   .= safety_field($name) . " {$order},";
@@ -1079,7 +1244,8 @@ if (!function_exists('query')) {
   function query($sql, $arg = [], $silent = false, $unbuffered = false)
   {
     return call(function ($s) use ($arg, $silent, $unbuffered) {
-      array_unshift($_GET['__LAST_QUERY_SQL__'], $s);
+      global $_GG;
+      array_unshift($_GG['__LAST_QUERY_SQL__'], $s);
       return DB::query($s, $arg, $silent, $unbuffered);
     }, safety_sql($sql));
   }
@@ -1089,7 +1255,8 @@ if (!function_exists('fetch_all')) {
   function fetch_all($sql, $arg = [], $keyfield = '', $silent = false)
   {
     return call(function ($s) use ($arg, $keyfield, $silent) {
-      array_unshift($_GET['__LAST_QUERY_SQL__'], $s);
+      global $_GG;
+      array_unshift($_GG['__LAST_QUERY_SQL__'], $s);
       return DB::fetch_all($s, $arg, $keyfield, $silent);
     }, safety_sql($sql));
   }
@@ -1099,7 +1266,8 @@ if (!function_exists('fetch_first')) {
   function fetch_first($sql, $arg = [], $silent = false)
   {
     return call(function ($s) use ($arg, $silent) {
-      array_unshift($_GET['__LAST_QUERY_SQL__'], $s);
+      global $_GG;
+      array_unshift($_GG['__LAST_QUERY_SQL__'], $s);
       return DB::fetch_first($s, $arg, $silent);
     }, safety_sql($sql));
   }
@@ -1109,7 +1277,8 @@ if (!function_exists('result_first')) {
   function result_first($sql, $arg = [], $silent = false)
   {
     return call(function ($s) use ($arg, $silent) {
-      array_unshift($_GET['__LAST_QUERY_SQL__'], $s);
+      global $_GG;
+      array_unshift($_GG['__LAST_QUERY_SQL__'], $s);
       return DB::result_first($s, $arg, $silent);
     }, safety_sql($sql));
   }
@@ -1154,6 +1323,31 @@ if (!function_exists('generate_order_id')) {
   }
 }
 
+if (!function_exists('can_count')) {
+  function can_count($name)
+  {
+    $counter = fetch_first("select * from pre_wukong_counters where name='{$name}'");
+    
+    // 没有则立即执行
+    if (!$counter) {
+      return 1;
+    }
+    
+    // 超过有效期，立即执行
+    if ($counter['expired_at'] < time()) {
+      return 1;
+    }
+    
+    // 未过期，未超限
+    if ($counter['expired_at'] > time() && $counter['count'] < $counter['max_count']) {
+      return $counter['count'] + 1;
+    }
+    
+    return false;
+  }
+  
+}
+
 if (!function_exists('counter')) {
   /**
    * 通用计数器
@@ -1175,6 +1369,28 @@ if (!function_exists('counter')) {
     return call($fn);
   }
 }
+
+if (!function_exists('removeAssets')) {
+  /**
+   * 根据相关业务 ID 删除资源
+   *
+   * @param $kind       string 可选参数：images|sounds|videos|origins
+   * @param $related_id int
+   */
+  function removeAssets($kind, $related_id)
+  {
+    global $mod, $ac;
+    if ($related_id < 1 || !is_numeric($related_id)) {
+      return;
+    }
+    
+    $assets = fetch_all("select id from pre_wukong_{$kind} where action='$mod/$ac' and related_id={$related_id}");
+    foreach ($assets as $v) {
+      query("update pre_wukong_{$kind} set used=0 where id={$v['id']}");
+    }
+  }
+}
+
 
 if (!function_exists('removeImages')) {
   /**
@@ -1212,6 +1428,19 @@ if (!function_exists('removeVideos')) {
   }
 }
 
+if (!function_exists('removeOrigins')) {
+  /**
+   * 根据相关业务 ID 删除原图
+   *
+   * @param $related_id int
+   */
+  function removeOrigins($related_id)
+  {
+    removeAssets('origins', $related_id);
+  }
+}
+
+
 if (!function_exists('diffAssets')) {
   /**
    * 对比模型间的新旧资源差异
@@ -1220,7 +1449,7 @@ if (!function_exists('diffAssets')) {
    * @param array $newModel
    * @return array
    */
-  function diffAssets($oldModel, $newModel = null, &$newIds = null)
+  function diffAssets($oldModel, $newModel = null)
   {
     $_pick_assets = function ($data) {
       $assets = [];
@@ -1229,13 +1458,7 @@ if (!function_exists('diffAssets')) {
           continue;
         }
         
-        preg_match_all('#(data/attachment/images/\d+)#m', $v, $matches);
-        $assets = array_merge($assets, array_values($matches[1]));
-        
-        preg_match_all('#(data/attachment/sounds/\d+)#m', $v, $matches);
-        $assets = array_merge($assets, array_values($matches[1]));
-        
-        preg_match_all('#(data/attachment/videos/\d+)#m', $v, $matches);
+        preg_match_all('#(data/attachment/(image|sound|video|origin)s(.dev)?/\d+)#m', $v, $matches);
         $assets = array_merge($assets, array_values($matches[1]));
         
         preg_match_all('#(data/attachment/forum/\d+/\d+/[a-z0-9]+(\.[a-z]+)?)#m', $v, $matches);
@@ -1243,33 +1466,6 @@ if (!function_exists('diffAssets')) {
       }
       
       return $assets;
-    };
-    
-    $_exclude_invalid_files = function ($files) {
-      $result = [];
-      foreach ($files as $v) {
-        if (is_file(trim($v))) {
-          $result[] = trim($v);
-        }
-      }
-      
-      return $result;
-    };
-    
-    $_get_file_ids = function ($files) {
-      $result = [];
-      foreach ($files as $v) {
-        if (preg_match('#data/attachment/images/(\d+)#', $v, $matches)) {
-          $result['images'][] = $matches[1];
-          
-        } elseif (preg_match('#data/attachment/sounds/(\d+)#', $v, $matches)) {
-          $result['sounds'][] = $matches[1];
-          
-        } elseif (preg_match('#data/attachment/videos/(\d+)#', $v, $matches)) {
-          $result['videos'][] = $matches[1];
-        }
-      }
-      return $result;
     };
     
     // 剔除模型中多余的参数
@@ -1280,15 +1476,8 @@ if (!function_exists('diffAssets')) {
       }
     }
     
-    // 挑出那些参数中的资源
-    $oldAssets = $_exclude_invalid_files($_pick_assets($oldModel));
-    $newAssets = $_exclude_invalid_files($_pick_assets($newModel));
-    
     // 返回不再被使用到的文件
-    if (isset($newIds)) {
-      $newIds = $_get_file_ids($newAssets);
-    }
-    return array_diff($oldAssets, $newAssets);
+    return array_diff($_pick_assets($oldModel), $_pick_assets($newModel));
   }
 }
 
@@ -1310,12 +1499,16 @@ if (!function_exists('image_file')) {
 if (!function_exists('clone_image')) {
   function clone_image($source)
   {
-    $file   = image_file($source);
-    $source = trim($source, '/');
-    
+    global $_USER;
+  
+    if (!is_file($source = trim($source, '/'))) {
+      fail('目标图片不存在: ' . $source);
+    }
+  
+    $ret_id = DB::insert('wukong_images', ['user_id' => $_USER['uid'], 'created_at' => time()], true);
+    $file   = "data/attachment/images/{$ret_id}" . (isInside() ? '.dev' : '');
     copy($source, $file);
-    copy("{$source}.mini", "{$file}.mini");
-    
+    chmod($file, 0755);
     return "/$file";
   }
 }
@@ -1389,6 +1582,13 @@ if (!function_exists('field_seed')) {
   }
 }
 
+if (!function_exists('number_compare')) {
+  function number_compare($a, $b)
+  {
+    return abs($a - $b) < DELTA;
+  }
+}
+
 if (!function_exists('user_signature')) {
   function user_signature()
   {
@@ -1396,6 +1596,20 @@ if (!function_exists('user_signature')) {
     return crc32($_USER['uid'] . $_SERVER['HTTP_ED_TOKEN'] . $_SERVER['HTTP_ED_VERSION'] . $_SERVER['HTTP_ED_SIGNATURE'] . $_SERVER['HTTP_USER_AGENT']);
   }
 }
+
+if (!function_exists('getallheaders')) {
+  function getallheaders()
+  {
+    $headers = [];
+    foreach ($_SERVER as $name => $value) {
+      if (substr($name, 0, 5) == 'HTTP_') {
+        $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+      }
+    }
+    return $headers;
+  }
+}
+
 
 if (!function_exists('utf82gbk')) {
   /**
