@@ -65,7 +65,7 @@ if (!function_exists('input')) {
   }
 }
 
-if (!function_exists('input')) {
+if (!function_exists('inc')) {
   function inc($name, $increase)
   {
     static $_vars = [];
@@ -160,6 +160,7 @@ if (!function_exists('fail')) {
     json(['status' => $status, 'msg' => $msg]);
   }
 }
+
 if (!function_exists('call')) {
   /**
    * 调用某个函数
@@ -243,11 +244,11 @@ if (!function_exists('uselock')) {
    * 使用全局锁
    * 注意，需要使用succ或fail才可以解锁
    */
-  function uselock($key)
+  function uselock($key, $tableName = 'pre_wukong_locks')
   {
-    lock($key);
+    lock($key, $tableName);
     defer(function () use ($key) {
-      unlock($key);
+      unlock($key, $tableName);
     });
   }
 }
@@ -1362,7 +1363,6 @@ if (!function_exists('noncestr')) {
   {
     $strings  = 'abcdefghijklmnopqrstuvwxyz0123456789';
     $noncestr = '';
-    
     for ($i = 0; $i < $length; $i++) {
       $noncestr .= $strings[mt_rand(0, 35)];
     }
