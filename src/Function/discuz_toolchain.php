@@ -990,7 +990,7 @@ if (!function_exists('transaction')) {
   function transaction($fn)
   {
     global $_GG;
-    if ($_GET['_transaction'] == 'NONE') {
+    if (isset($_GET['_transaction']) && $_GET['_transaction'] == 'NONE') {
       return;
     }
     

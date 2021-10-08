@@ -249,6 +249,22 @@ class Str
   }
   
   /**
+   * 生成uuid
+   *
+   * @param string $separate 分隔符
+   * @return string
+   */
+  public static function uuid($separate = '-')
+  {
+    $chars = md5(uniqid(mt_rand(), true));
+    return substr($chars, 0, 8) . $separate
+           . substr($chars, 8, 4) . $separate
+           . substr($chars, 12, 4) . $separate
+           . substr($chars, 16, 4) . $separate
+           . substr($chars, 20, 12);
+  }
+  
+  /**
    * 判断给定的字符串是否是有效的 uuid。
    *
    * @param string $value
