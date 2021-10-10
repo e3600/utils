@@ -1500,11 +1500,11 @@ if (!function_exists('clone_image')) {
   function clone_image($source)
   {
     global $_USER;
-  
+    
     if (!is_file($source = trim($source, '/'))) {
       fail('目标图片不存在: ' . $source);
     }
-  
+    
     $ret_id = DB::insert('wukong_images', ['user_id' => $_USER['uid'], 'created_at' => time()], true);
     $file   = "data/attachment/images/{$ret_id}" . (isInside() ? '.dev' : '');
     copy($source, $file);
@@ -1627,13 +1627,16 @@ if (!function_exists('utf82gbk')) {
 
 // Discuz专用redis - - - - - Start
 if (!function_exists('redis_get')) {
-  function redis_get($name, $fn, $prefix = '')
+  function redis_get($name, $fn = null, $prefix = '')
   {
     $value = C::memory()->get($name, $prefix);
     if ($value) {
       return $value;
+    } else if ($fn) {
+      return $fn();
+    } else {
+      return false;
     }
-    return $fn();
   }
 }
 
