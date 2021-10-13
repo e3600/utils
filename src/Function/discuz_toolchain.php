@@ -264,7 +264,7 @@ if (!function_exists('uselock')) {
   function uselock($key, $tableName = 'pre_wukong_locks')
   {
     lock($key, $tableName);
-    defer(function () use ($key) {
+    defer(function () use ($key, $tableName) {
       unlock($key, $tableName);
     });
   }
