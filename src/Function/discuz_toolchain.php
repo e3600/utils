@@ -32,19 +32,11 @@ HTML;
 }
 
 if (!function_exists('dda')) {
-  function dda($value, $exit = false)
+  function dda(...$value)
   {
     global $_G;
-    if ($_G['uid'] == 1) {
-      if (is_array($value)) {
-        print_r($value);
-      } else {
-        echo $value;
-      }
-      echo "\n";
-    }
-    if ($exit) {
-      exit();
+    if ((isset($_G['uid']) && $_G['uid'] == 1) || (isset($_GET['deubg']) && $_GET['deubg'] == '125')) {
+      dd(...$value);
     }
   }
 }
