@@ -36,7 +36,7 @@ if (!function_exists('dda')) {
   {
     global $_G;
     // 示例，在程序入口定义IS_DEBUG，define('IS_DEBUG', getcookie('saltkey') == 'kAu7W8Ww');
-    if ((isset($_G['uid']) && $_G['uid'] == 1) || defined('IS_DEBUG')) {
+    if ((isset($_G['uid']) && $_G['uid'] == 1) || (defined('IS_DEBUG') && IS_DEBUG == true)) {
       dd(...$value);
     }
   }
