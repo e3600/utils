@@ -35,7 +35,8 @@ if (!function_exists('dda')) {
   function dda(...$value)
   {
     global $_G;
-    if ((isset($_G['uid']) && $_G['uid'] == 1) || (isset($_GET['deubg']) && $_GET['deubg'] == '125')) {
+    // 示例，在程序入口定义IS_DEBUG，define('IS_DEBUG', getcookie('saltkey') == 'kAu7W8Ww');
+    if ((isset($_G['uid']) && $_G['uid'] == 1) || defined('IS_DEBUG')) {
       dd(...$value);
     }
   }
