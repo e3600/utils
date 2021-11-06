@@ -1405,16 +1405,19 @@ function user_signature()
   return crc32($_USER['uid'] . $_SERVER['HTTP_ED_TOKEN'] . $_SERVER['HTTP_ED_VERSION'] . $_SERVER['HTTP_ED_SIGNATURE'] . $_SERVER['HTTP_USER_AGENT']);
 }
 
-function getallheaders()
-{
-  $headers = [];
-  foreach ($_SERVER as $name => $value) {
-    if (substr($name, 0, 5) == 'HTTP_') {
-      $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+if (!function_exists('getallheaders')) {
+  function getallheaders()
+  {
+    $headers = [];
+    foreach ($_SERVER as $name => $value) {
+      if (substr($name, 0, 5) == 'HTTP_') {
+        $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+      }
     }
+    return $headers;
   }
-  return $headers;
 }
+
 
 /**
  * UTF-8转GBK
